@@ -8,8 +8,8 @@ $prices_base = [
     'ADA' => 0.50
 ];
 
-$feePercent = 0.5;      
-$minPurchase = 1.00;   
+$feePercent = 0.5;
+$minPurchase = 1.00;
 $maxPurchase = 10000.00;
 
 if (!isset($_SESSION['user'])) {
@@ -29,7 +29,7 @@ if (!isset($_SESSION['csrf_token'])) {
 
 $prices = [];
 foreach ($prices_base as $k => $v) {
-    $randPct = (rand(-200, 200) / 10000.0); 
+    $randPct = (rand(-200, 200) / 10000.0);
     $prices[$k] = round($v * (1 + $randPct), 8);
 }
 
@@ -47,11 +47,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy']) && $_POST['buy'] == '1') {
-    
+
     if (!isset($_POST['csrf']) || $_POST['csrf'] !== $_SESSION['csrf_token']) {
         $error = "Invalid request (CSRF).";
     } else {
-        $mode = ($_POST['mode'] ?? 'fiat'); 
+        $mode = ($_POST['mode'] ?? 'fiat');
         $crypto = strtoupper(trim($_POST['crypto'] ?? ''));
         $fiatAmount = isset($_POST['fiat_amount']) ? (float) $_POST['fiat_amount'] : 0.0;
         $cryptoAmount = isset($_POST['crypto_amount']) ? (float) $_POST['crypto_amount'] : 0.0;
@@ -102,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy']) && $_POST['buy
                             'total_cost' => round($totalCost, 8),
                             'crypto_qty' => round($cryptoQty, 8)
                         ];
-                        array_unshift($_SESSION['history'], $tx); 
+                        array_unshift($_SESSION['history'], $tx);
 
                         $success = "Pembelian berhasil: {$tx['crypto_qty']} {$crypto} dibeli seharga \$" . number_format($tx['total_cost'],2) . " (fee \$" . number_format($tx['fee'],2) . ").";
                     }
@@ -121,7 +121,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy']) && $_POST['buy
     <title>Sistem Pembelian Crypto — Simulasi</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <style>
-    /* Modern, elegant CSS */
     :root {
         --bg: #0f1724;
         --card: #0b1220;
@@ -380,7 +379,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy']) && $_POST['buy
 
 <body>
     <div class="container">
-        <!-- LEFT: MAIN BUY CARD -->
         <div class="card">
             <header class="top">
                 <div class="brand">CR</div>
@@ -412,7 +410,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy']) && $_POST['buy
                 </div>
             </div>
 
-            <!-- Price strip -->
             <div class="prices" style="margin-bottom:16px">
                 <?php foreach ($prices as $k => $p): ?>
                 <div class="priceItem">
@@ -554,7 +551,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy']) && $_POST['buy
                 real-time, DB, otentikasi, dan perhitungan presisi (integer / bcmath).</p>
         </div>
 
-        <!-- RIGHT: SUMMARY / INFO -->
         <aside class="card">
             <h3 style="margin-top:0">Ringkasan</h3>
             <p class="muted">Informasi singkat & tips</p>
@@ -587,7 +583,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy']) && $_POST['buy
 
     <script>
     (function() {
-        // Elements
         const prices = <?php echo json_encode($prices); ?>;
         const cryptoSelect = document.getElementById('crypto');
         const fiatInput = document.getElementById('fiat_amount');
@@ -600,11 +595,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy']) && $_POST['buy
         const feeInput = document.getElementById('fee_percent');
         const balanceEl = document.getElementById('balance');
 
-        let mode = 'fiat'; // 'fiat' or 'crypto'
+        let mode = 'fiat';
         const fiatBlock = document.getElementById('fiatBlock');
         const cryptoBlock = document.getElementById('cryptoBlock');
 
-        // init preview
         function updatePreview() {
             const crypto = cryptoSelect.value;
             const price = parseFloat(prices[crypto]) || 0;
@@ -637,7 +631,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy']) && $_POST['buy
             }
         }
 
-        // Event listeners
         cryptoSelect.addEventListener('change', updatePreview);
         fiatInput.addEventListener('input', updatePreview);
         cryptoInput.addEventListener('input', updatePreview);
@@ -673,28 +666,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy']) && $_POST['buy
             updatePreview();
         });
 
-        // Copy balance
         document.getElementById('copyBalance').addEventListener('click', function() {
             navigator.clipboard.writeText(balanceEl.textContent.trim()).then(function() {
                 alert('Saldo disalin: $' + balanceEl.textContent.trim());
             });
         });
 
-        // simulate small price movement on client
         document.getElementById('simulatePrice').addEventListener('click', function() {
             for (let k in prices) {
-                let pct = (Math.random() * 4 - 2) / 100.0; // -2%..+2%
+                let pct = (Math.random() * 4 - 2) / 100.0;
                 prices[k] = (parseFloat(prices[k]) * (1 + pct)).toFixed(8);
             }
-            // refresh price labels
             updatePreview();
             alert('Harga disimulasikan berubah. Reload halaman untuk harga server baru.');
         });
 
-        // initial
         updatePreview();
 
-        // Form submit client validation: ensure min / max / balance check (friendly)
         document.getElementById('buyForm').addEventListener('submit', function(e) {
             const fiatVal = parseFloat(fiatInput.value) || 0;
             const cryptoVal = parseFloat(cryptoInput.value) || 0;
@@ -719,7 +707,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy']) && $_POST['buy
                 fiatUsed = cryptoVal * selectedPrice;
             }
 
-            // min/max (match server config)
             const min = <?php echo $minPurchase; ?>;
             const max = <?php echo $maxPurchase; ?>;
             if (fiatUsed < min || fiatUsed > max) {
@@ -737,8 +724,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['buy']) && $_POST['buy
                 return;
             }
 
-            // set mode hidden field for server
-            // inject a hidden input
             let existing = document.querySelector('input[name="mode"]');
             if (!existing) {
                 const inpt = document.createElement('input');
